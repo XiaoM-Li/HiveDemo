@@ -1,0 +1,5 @@
+º¯Êý
+show functions;
+describe function concat;
+concat('abc','def');
+avg(price_close);

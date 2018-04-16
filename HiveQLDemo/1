@@ -1,0 +1,66 @@
+HiveQL：数据定义
+create database financials;
+create database if not exists financials;
+
+create database financials
+comment 'Holds all financials tables';//添加描述信息
+Hive会为每个数据库创建一个目录，数据库中的表会以这个数据库目录的子目录形式存储。
+describe database financials;
+
+drop database if  exists financials;
+默认情况下，hive不允许用户删除一个包含有表的数据库的。
+drop database if  exists financials cascade；这种方式可以
+
+create table if not exists mydb.employees (
+	name string comment 'Employee name',
+	salary float comment 'Employee salary',
+	subordinates array<string> comment 'Name of subordinates',
+	deductions map<string,float> comment 'Keys are deductions names,values are percentages',
+	address struct<street:string,city:string,state:string,zip:int> comment 'Home address'
+) comment 'Description of the table';
+
+创建表的时候可以用location指定表的位置
+
+describe employees;
+describe employees.salary;
+
+用户还可以拷贝一张已经存在的表模式，而无需拷贝数据：
+create table employees2 like employees;
+
+show tables in mydb;
+
+create external table stocks (
+exc string,
+symbol string,
+ymd string,
+price_open float,
+price_high float,
+prrice_low float,
+price_close float,
+volume int,
+price_adj_close float)
+row format delimited fields terminated by ','
+location '/data/stocks';
+
+
+create table employees(
+name string,
+salary float,
+subordinates array<string>,
+deductions map<string,float>,
+address struct<street:string,city:string,state:string,zip:int>)
+partitioned by (country string,state string);
+
+
+
+show partitions employees;//查看表中存在的所有分区
+show partitions employees partition(country='US');
+show partitions employees partition(country='US',state='AK');
+
+修改表
+alter table
+alter table log_messages rename to logmsgs;//重命名
+alter table log_messages add partition(year='2011',month='10',day='1');//增加分区，可以一次添加多个分区
+alter table log_messages drop partition(year='2011',month='10',day='1');//删除分区
+alter table log_messages change column hms hour_minute_seconds int after severity;//修改列名并将这个列放在severity后面
+alter table log_messages add columns(app_name string,session_id long);增加列

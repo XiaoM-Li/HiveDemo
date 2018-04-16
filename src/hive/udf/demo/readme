@@ -1,0 +1,6 @@
+add jar /root/MyDemo/zodiac.jar;
+create temporary function zodiac as 'hive.udf.demo.UDFOne';
+temporary指定当前回话中声明的函数只会在当前会话中生效。
+drop temporary function zodiac;//删除函数
+
+GenericUDF，是更为复杂的抽象概念，但是其支持更好的NULL值处理同时可以处理一些标准的UDF无法支持的编程操作。

@@ -1,0 +1,57 @@
+HiveQL:数据操作
+hive不支持一条一条的数据插入，需要一批一批的插入
+直接把定义好的数据文件放到表目录下，数据也能显示出来
+load data local inpath '/root/MyDemo/employees.txt' overwrite into table employees partition (country='US',state='CA');//向表中添加数据需要指明分区
+load data local对应本地文件，将文件拷贝一份到HDFS上
+不要local，直接将数据转移到对应的表目录下
+使用overwrite会覆盖以前的数据,没有这个关键字的话会追加到目录下，之前的数据不会删除掉
+
+动态分区
+insert overwrite table employees partition (country,state) select ...,se.cnty,se.st from staged_employees se;
+分区的两个字段，可以一个是静态的，一个是动态的，但静态的要在动态之前出现。
+动态分区需要对hive.exec.daynamic.partition 设置为true，默认为false
+hive.exec.daynamic.partitio.mode 默认值为strict，需要设置为nonstrict，表示允许所有分区都是动态的
+
+create table ca_employees as select name,salary,address from employees;
+
+导出数据，这里的关键字overwrite和local和之前的说明是一样的
+insert overwrite local directory '/root/MyDemo/hiveOut' select name,salary,address from employees;
+
+
+数据查询
+select name,salary from employees;
+集合数据元素类型中的元素引用：
+数组索引是基于0的。select name,subordinates[0] from employees;
+map元素，使用键值索引。select name,deductions['State Taxes'] from employees;
+结构体使用点符号。 select name,address.city from employees; 
+
+使用正则表达式来指定列
+select symbol,`price.*` from stocks limit 100;
+
+select upper(name),salary*10,type M from employees;
+
+select e.name,e.salary_minus_fed_taxes from (select upper(name),salary,deductions["Federal Taxes"] as fed_taxes,
+round(salary*(1-deductions["Federal Taxes"])) as salary_minus_fed_taxes from employees) e where e.salary_minus_fed_taxes > 70000 ;
+
+
+select name,salary,case when salary<50000.0 then 'low'
+when salary>=50000.0 and salary <70000.0 then 'middle'
+when salary>=70000.0 and salary <100000.0 then 'high'
+else 'very high'
+end as bracket from employees;
+
+set hive.exec.model.local.auto=true，hive还会尝试使用本地模式执行其他的操作
+
+select name,address.street from employees where address.street like '%Ave.';
+
+group by 语句通常会和聚合函数一起使用，按照一个或者多个列对结果进行分组，然后按照每个组执行聚合操作。
+select year(ymd),avg(price_close) from stocks where exc='NASDAQ' and symbol='AAPL' group by year(ymd);//按照年份来分组，计算每一年的平均收盘价
+
+having语句对分组结果进行过滤
+select year(ymd),avg(price_close) from stocks where exc='NASDAQ' and symbol='AAPL' group by year(ymd) having avg(price_close)>50;
+
+
+join语句
+hive支持通常的SQL join语句，但是只支持等值连接。
+select a.ymd,a.price_close,b.price_close from stocks a join stocks b on a.ymd=b.ymd where a.symbol='AAPL' and b.symbol='IBM';
+select a.ymd,a.price_close,b.price_close,c.price_close from stocks a join stocks b on a.ymd=b.ymd join stocks c on a.ymd=c.ymd where a.symbol='AAPL' and b.symbol='IBM' and c.symbol='GE';
