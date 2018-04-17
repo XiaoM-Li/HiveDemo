@@ -1,6 +1,18 @@
+简单API org.apache.hadoop.hive.ql.exec.UDF，实现evaluate函数即可。
+
 add jar /root/MyDemo/zodiac.jar;
 create temporary function zodiac as 'hive.udf.demo.UDFOne';
 temporary指定当前回话中声明的函数只会在当前会话中生效。
 drop temporary function zodiac;//删除函数
 
 GenericUDF，是更为复杂的抽象概念，但是其支持更好的NULL值处理同时可以处理一些标准的UDF无法支持的编程操作。
+org.apache.hadoop.hive.ql.udf.generic.GenericUDF 复杂的GenericUDF可以处理Map、List、Set类型。
+GenericUDF需要实现以下三个方法：
+//这个方法只调用一次，并且在evaluate()方法之前调用。该方法接受的参数是一个ObjectInspectors数组。该方法检查接受正确的参数类型和参数个数。  
+abstract ObjectInspector initialize(ObjectInspector[] arguments);  
+  
+//这个方法类似UDF的evaluate()方法。它处理真实的参数，并返回最终结果。  
+abstract Object evaluate(GenericUDF.DeferredObject[] arguments);  
+  
+//这个方法用于当实现的GenericUDF出错的时候，打印出提示信息。而提示信息就是你实现该方法最后返回的字符串。  
+abstract String getDisplayString(String[] children);
