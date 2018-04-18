@@ -1,15 +1,15 @@
-HiveQL£ºÊı¾İ¶¨Òå
+HiveQLï¼šæ•°æ®å®šä¹‰
 create database financials;
 create database if not exists financials;
 
 create database financials
-comment 'Holds all financials tables';//Ìí¼ÓÃèÊöĞÅÏ¢
-Hive»áÎªÃ¿¸öÊı¾İ¿â´´½¨Ò»¸öÄ¿Â¼£¬Êı¾İ¿âÖĞµÄ±í»áÒÔÕâ¸öÊı¾İ¿âÄ¿Â¼µÄ×ÓÄ¿Â¼ĞÎÊ½´æ´¢¡£
+comment 'Holds all financials tables';//æ·»åŠ æè¿°ä¿¡æ¯
+Hiveä¼šä¸ºæ¯ä¸ªæ•°æ®åº“åˆ›å»ºä¸€ä¸ªç›®å½•ï¼Œæ•°æ®åº“ä¸­çš„è¡¨ä¼šä»¥è¿™ä¸ªæ•°æ®åº“ç›®å½•çš„å­ç›®å½•å½¢å¼å­˜å‚¨ã€‚
 describe database financials;
 
 drop database if  exists financials;
-Ä¬ÈÏÇé¿öÏÂ£¬hive²»ÔÊĞíÓÃ»§É¾³ıÒ»¸ö°üº¬ÓĞ±íµÄÊı¾İ¿âµÄ¡£
-drop database if  exists financials cascade£»ÕâÖÖ·½Ê½¿ÉÒÔ
+é»˜è®¤æƒ…å†µä¸‹ï¼Œhiveä¸å…è®¸ç”¨æˆ·åˆ é™¤ä¸€ä¸ªåŒ…å«æœ‰è¡¨çš„æ•°æ®åº“çš„ã€‚
+drop database if  exists financials cascadeï¼›è¿™ç§æ–¹å¼å¯ä»¥
 
 create table if not exists mydb.employees (
 	name string comment 'Employee name',
@@ -19,12 +19,12 @@ create table if not exists mydb.employees (
 	address struct<street:string,city:string,state:string,zip:int> comment 'Home address'
 ) comment 'Description of the table';
 
-´´½¨±íµÄÊ±ºò¿ÉÒÔÓÃlocationÖ¸¶¨±íµÄÎ»ÖÃ
+åˆ›å»ºè¡¨çš„æ—¶å€™å¯ä»¥ç”¨locationæŒ‡å®šè¡¨çš„ä½ç½®
 
 describe employees;
 describe employees.salary;
 
-ÓÃ»§»¹¿ÉÒÔ¿½±´Ò»ÕÅÒÑ¾­´æÔÚµÄ±íÄ£Ê½£¬¶øÎŞĞè¿½±´Êı¾İ£º
+ç”¨æˆ·è¿˜å¯ä»¥æ‹·è´ä¸€å¼ å·²ç»å­˜åœ¨çš„è¡¨æ¨¡å¼ï¼Œè€Œæ— éœ€æ‹·è´æ•°æ®ï¼š
 create table employees2 like employees;
 
 show tables in mydb;
@@ -51,16 +51,19 @@ deductions map<string,float>,
 address struct<street:string,city:string,state:string,zip:int>)
 partitioned by (country string,state string);
 
+//æ¡¶è¡¨çš„ç›¸å…³æ“ä½œ
+create table bucket_user(id int,name string) clustered by (id) into 4 buckets row format delimited fields terminated by ',';//åˆ›å»ºæ¡¶è¡¨
+set hive.enforce.bucketing=true;
+insert into table  bucket_user select * from user;
 
-
-show partitions employees;//²é¿´±íÖĞ´æÔÚµÄËùÓĞ·ÖÇø
+show partitions employees;//æŸ¥çœ‹è¡¨ä¸­å­˜åœ¨çš„æ‰€æœ‰åˆ†åŒº
 show partitions employees partition(country='US');
 show partitions employees partition(country='US',state='AK');
 
-ĞŞ¸Ä±í
+ä¿®æ”¹è¡¨
 alter table
-alter table log_messages rename to logmsgs;//ÖØÃüÃû
-alter table log_messages add partition(year='2011',month='10',day='1');//Ôö¼Ó·ÖÇø£¬¿ÉÒÔÒ»´ÎÌí¼Ó¶à¸ö·ÖÇø
-alter table log_messages drop partition(year='2011',month='10',day='1');//É¾³ı·ÖÇø
-alter table log_messages change column hms hour_minute_seconds int after severity;//ĞŞ¸ÄÁĞÃû²¢½«Õâ¸öÁĞ·ÅÔÚseverityºóÃæ
-alter table log_messages add columns(app_name string,session_id long);Ôö¼ÓÁĞ
+alter table log_messages rename to logmsgs;//é‡å‘½å
+alter table log_messages add partition(year='2011',month='10',day='1');//å¢åŠ åˆ†åŒºï¼Œå¯ä»¥ä¸€æ¬¡æ·»åŠ å¤šä¸ªåˆ†åŒº
+alter table log_messages drop partition(year='2011',month='10',day='1');//åˆ é™¤åˆ†åŒº
+alter table log_messages change column hms hour_minute_seconds int after severity;//ä¿®æ”¹åˆ—åå¹¶å°†è¿™ä¸ªåˆ—æ”¾åœ¨severityåé¢
+alter table log_messages add columns(app_name string,session_id long);å¢åŠ åˆ—
