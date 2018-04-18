@@ -1,1 +1,14 @@
 hive可以将表存储为多种格式，可以使用压缩
+
+
+导入数据：
+可以使用load data，通过将文件复制或移到表的目录中，从而把数据导入hive的表或分区。
+也可以用insert语句把数据从一个hive表填充到另一个，或在新建表的时候使用create table ... as select
+insert overwrite table target select col1,col2 from source;
+insert overwrite table target partition (dt='2001-01-01') select col1,col2 from source;
+可以在select语句中通过使用分区值来动态指明分区：
+insert overwrite table target partition (dt) select col1,col2,dt from source;
+
+from source insert overwrite table target select col1,col2;
+
+还可以多表插入
